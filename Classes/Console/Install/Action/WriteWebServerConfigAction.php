@@ -54,8 +54,9 @@ class WriteWebServerConfigAction implements InstallActionInterface
         if ($arguments['webServerConfig'] === 'none') {
             return true;
         }
-        $publicPath = getenv('TYPO3_PATH_WEB') ?: Environment::getPublicPath();
-        $sourcePath = $isLegacySystem ? dirname(__DIR__, 4) . '/Resources/Private/Compatibility/TYPO3v87/FolderStructureTemplateFiles' : Environment::getPublicPath() . '/typo3/sysext/install/Resources/Private/FolderStructureTemplateFiles';
+        $publicPath = getenv('TYPO3_PATH_WEB') ?: PATH_site;
+        $rootPath = getenv('TYPO3_PATH_ROOT') ?: Environment::getPublicPath();
+        $sourcePath = $isLegacySystem ? dirname(__DIR__, 4) . '/Resources/Private/Compatibility/TYPO3v87/FolderStructureTemplateFiles' : $rootPath . '/typo3/sysext/install/Resources/Private/FolderStructureTemplateFiles';
         if ($arguments['webServerConfig'] === 'apache') {
             $source = $sourcePath . '/root-htaccess';
             $target = $publicPath . '/.htaccess';
