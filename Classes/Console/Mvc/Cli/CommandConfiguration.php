@@ -15,7 +15,6 @@ namespace Helhum\Typo3Console\Mvc\Cli;
  */
 
 use Symfony\Component\Console\Exception\RuntimeException;
-use TYPO3\CMS\Core\Package\PackageInterface;
 use TYPO3\CMS\Core\Package\PackageManager;
 
 /**
@@ -164,7 +163,7 @@ class CommandConfiguration
         } else {
             // We only reach this point in non composer mode
             // We ensure that our commands are present, even if we are not an active extension or even not being an extension at all
-            $configuration[] = require __DIR__ . '/../../../../Configuration/Commands.php';
+            $configuration[] = self::unifyCommandConfiguration($this->getConfigFromExtension(__DIR__ . '/../../../../'), 'typo3_console');
         }
         foreach ($this->packageManager->getActivePackages() as $package) {
             if ($package->getPackageKey() === 'typo3_console') {
@@ -172,7 +171,7 @@ class CommandConfiguration
                 // We registered our commands above already
                 continue;
             }
-            $packageConfig = $this->getConfigFromExtension($package);
+            $packageConfig = $this->getConfigFromExtension($package->getPackagePath());
             if (!empty($packageConfig)) {
                 self::ensureValidCommandRegistration($packageConfig, $package->getPackageKey());
                 $configuration[] = self::unifyCommandConfiguration($packageConfig, $package->getPackageKey());
@@ -182,14 +181,14 @@ class CommandConfiguration
         return $configuration;
     }
 
-    private function getConfigFromExtension(PackageInterface $package): array
+    private function getConfigFromExtension(string $packagePath): array
     {
         $commandConfiguration = [];
-        if (file_exists($commandConfigurationFile = $package->getPackagePath() . 'Configuration/Console/Commands.php')) {
+        if (file_exists($commandConfigurationFile = $packagePath . 'Configuration/Console/Commands.php')) {
             trigger_error('Configuration/Console/Commands.php for registering commands is deprecated and will be removed with 6.0. Register Symfony commands in Configuration/Commands.php instead.', E_USER_DEPRECATED);
             $commandConfiguration = require $commandConfigurationFile;
         }
-        if (file_exists($commandConfigurationFile = $package->getPackagePath() . 'Configuration/Commands.php')) {
+        if (file_exists($commandConfigurationFile = $packagePath . 'Configuration/Commands.php')) {
             $commandConfiguration['commands'] = require $commandConfigurationFile;
         }
 
